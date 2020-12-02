@@ -1,6 +1,5 @@
 package pl.edu.pjwstk.jazapi.service;
 
-import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import pl.edu.pjwstk.jazapi.model.AddOn;
 import pl.edu.pjwstk.jazapi.model.Car;
