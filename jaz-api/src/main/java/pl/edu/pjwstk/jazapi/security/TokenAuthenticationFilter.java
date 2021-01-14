@@ -3,11 +3,14 @@ package pl.edu.pjwstk.jazapi.security;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.http.converter.json.JsonbHttpMessageConverter;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.AuthorityUtils;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
@@ -15,9 +18,7 @@ import javax.servlet.FilterChain;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Date;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static pl.edu.pjwstk.jazapi.security.util.SecurityConstants.EXPIRATION_TIME;
@@ -51,9 +52,12 @@ public class TokenAuthenticationFilter extends UsernamePasswordAuthenticationFil
                                             FilterChain chain,
                                             Authentication auth) throws IOException {
         String subject = auth.getPrincipal().toString();
+        ObjectMapper mapper = new ObjectMapper();
+        var authorities = auth.getAuthorities().stream().map(GrantedAuthority::getAuthority).collect(Collectors.toList());
 
         String token = JWT.create()
                 .withSubject(subject)
+                .withClaim("roles", authorities)
                 .withExpiresAt(new Date(System.currentTimeMillis() + EXPIRATION_TIME))
                 .sign(Algorithm.HMAC512(SECRET));
 
