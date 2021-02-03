@@ -9,7 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-public abstract class CrudService<T extends DbEntity> {
+public abstract class CrudService<T extends Identifiable> {
     JpaRepository<T, Long> repository;
 
     public CrudService(JpaRepository<T, Long> repository) {
