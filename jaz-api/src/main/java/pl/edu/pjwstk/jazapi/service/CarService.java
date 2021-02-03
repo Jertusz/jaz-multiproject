@@ -19,6 +19,10 @@ public class CarService extends CrudService<Car> {
         this.addOnRepository = addOnRepository;
     }
 
+    public List<Car> getByManufacturer(String manufacturer){
+        return ((CarRepository) repository).getByManufacturer(manufacturer);
+    }
+
     @Override
     public Car createOrUpdate(Car updateEntity) {
         if (updateEntity.getId() == null) {

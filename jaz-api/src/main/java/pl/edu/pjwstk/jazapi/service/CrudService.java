@@ -6,29 +6,48 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
 public abstract class CrudService<T extends Identifiable> {
-    JpaRepository<T, Long> repository;
+    protected JpaRepository<T, Long> repository;
 
     public CrudService(JpaRepository<T, Long> repository) {
         this.repository = repository;
     }
 
-    public List<T> getAll(int page, int size, String[] sort) {
-        Pageable pageable;
-        if (sort[0].equals("asc")) {
-            pageable = PageRequest.of(page, size, Sort.by(sort[1]).ascending());
-        } else {
-            pageable = PageRequest.of(page, size, Sort.by(sort[1]).descending());
-        }
-        Iterable<T> items = repository.findAll(pageable);
+    public List<T> getAll(int size, int page, String sort) {
+        Pageable paging = buildPaging(size, page, sort);
+        Iterable<T> items = repository.findAll(paging);
         var itemList = new ArrayList<T>();
 
         items.forEach(itemList::add);
 
         return itemList;
+    }
+    public List<T> getAll() {
+        List<T> items = repository.findAll();
+        return items;
+    }
+
+    private Pageable buildPaging(int size, int page, String sort) {
+        Sort.Direction direction = Sort.Direction.ASC;
+        String[] sortStringArray = sort.split(",");
+        if (sortStringArray.length == 0)
+            sortStringArray = new String[]{sort};
+
+        String firstKey = sortStringArray[0].toLowerCase();
+        String[] sortProperties = sortStringArray;
+
+        if (firstKey.equals("asc")) {
+            sortProperties = Arrays.stream(sortStringArray).skip(1).toArray(String[]::new);
+        } else if (firstKey.equals("desc")) {
+            direction = Sort.Direction.DESC;
+            sortProperties = Arrays.stream(sortStringArray).skip(1).toArray(String[]::new);
+        }
+
+        return PageRequest.of(page, size, Sort.by(direction, sortProperties));
     }
 
     public T getById(Long id) {

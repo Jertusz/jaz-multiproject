@@ -10,7 +10,8 @@ import pl.edu.pjwstk.jazapi.service.AddOnService;
 
 import java.util.Collection;
 import java.util.function.Function;
-
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 @RestController
 @RequestMapping("/addons")
 public class AddOnController extends CrudController<AddOn, AddOnDTO> {
@@ -21,17 +22,23 @@ public class AddOnController extends CrudController<AddOn, AddOnDTO> {
 
     @Override
     public Function<AddOn, AddOnDTO> transformToDTO() {
-        return null;
+        return AddOnDTO::new;
+    }
+
+
+    @Override
+    public Function<Collection<EntityModel<AddOnDTO>>, CollectionModel<EntityModel<AddOnDTO>>> addLinksForCollection() {
+        return addon -> CollectionModel.of(addon,
+                linkTo(methodOn(CarController.class).getAll()).withRel("cars")
+        );
     }
 
     @Override
     public Function<AddOnDTO, EntityModel<AddOnDTO>> addLinksForItem() {
-        return null;
-    }
-
-    @Override
-    public Function<Collection<EntityModel<AddOnDTO>>, CollectionModel<EntityModel<AddOnDTO>>> addLinksForCollection() {
-        return null;
+        return addons -> EntityModel.of(addons,
+                linkTo(methodOn(AddOnController.class).getById(addons.getId())).withSelfRel(),
+                linkTo(methodOn(AddOnController.class).getAll()).withRel("addons")
+        );
     }
 }
 
